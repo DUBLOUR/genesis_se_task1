@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-const logFile string = "/var/log/btc-requester/responces.log"
+const logFile string = "/var/log/btc-requester/responses.log"
 const dbFile string = "/etc/btc-requester/users.csv"
 const serverPort string = ":9990"
 
@@ -16,18 +16,18 @@ func Respond(w http.ResponseWriter, r *http.Request, httpStatus int, data map[st
 	w.WriteHeader(httpStatus)
 	json.NewEncoder(w).Encode(data)
 
-	//Log requst and responce data
+	//Log requests and response data
 	log.Println("REQ:", r.URL.String(), "\nSTATUS:", httpStatus, "BODY:", data)
 }
 
 func main() {
 	//Init log file
-	loger, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	logger, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer loger.Close()
-	log.SetOutput(loger)
+	defer logger.Close()
+	log.SetOutput(logger)
 
 	//Common case for incorrect endpoints
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -39,7 +39,7 @@ func main() {
 
 	//Registration of new account
 	//Require `email` and `password` fields in URL
-	//Append new user in `dbFile` and return `{"status":"Ok"}` if successfull
+	//Append new user in `dbFile` and return `{"status":"Ok"}` if successful
 	http.HandleFunc("/user/create", func(w http.ResponseWriter, r *http.Request) {
 		email := r.URL.Query().Get("email")
 		password := r.URL.Query().Get("password")
@@ -59,7 +59,7 @@ func main() {
 
 	//Get an API-token for registered users
 	//Require `email` and `password` fields in URL
-	//Return `{"status":"Ok","token":"############"}` if successfull
+	//Return `{"status":"Ok","token":"############"}` if successful
 	http.HandleFunc("/user/login", func(w http.ResponseWriter, r *http.Request) {
 		email := r.URL.Query().Get("email")
 		password := r.URL.Query().Get("password")
@@ -82,7 +82,7 @@ func main() {
 
 	//Get a current cost of BitCoin in UAH
 	//Require `token` in URL on `X-API-Key` in Header (more priority)
-	//Return `{"status":"Ok","BTCUAH":$$$$$$}` if successfull
+	//Return `{"status":"Ok","BTCUAH":$$$$$$}` if successful
 	http.HandleFunc("/btcRate", func(w http.ResponseWriter, r *http.Request) {
 		var urlToken, headerToken, token string
 		urlToken = r.URL.Query().Get("token")
@@ -94,22 +94,21 @@ func main() {
 			token = urlToken
 		}
 
-		if IsAvaiableToken(token) { //Find user in database with that token
-			cost, httpStatus, err := Cost("BTCUAH")
+		if IsAvailableToken(token) { //Find user in database with that token
+			cost, err := Cost("BTCUAH")
 
-			mess := map[string]interface{}{}
 			if err == nil {
-				mess = map[string]interface{}{
+				mess := map[string]interface{}{
 					"status": "Ok",
 					"BTCUAH": cost,
 				}
+				Respond(w, r, http.StatusOK, mess)
 			} else {
-				mess = map[string]interface{}{
+				mess := map[string]interface{}{
 					"status": err.Error(),
 				}
+				Respond(w, r, http.StatusInternalServerError, mess)
 			}
-			Respond(w, r, httpStatus, mess)
-			return
 		}
 
 		if token == "" {
