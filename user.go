@@ -10,18 +10,11 @@ import (
 	"time"
 )
 
-type User struct {
-	Email        string
-	PasswordHash string
-	Token        string //Random string generated at registration
-}
-
-//Hashing with salt
+//Hashing with saltFindByEmailOrToken
 //Return 44-symbols string (base64)
 func PasswordHash(password string) string {
-	const salt string = "Yeeh_zMVk3"
 	hasher := sha512.New512_256()
-	hasher.Write([]byte(password + salt))
+	hasher.Write([]byte(password + PasswordSalt))
 	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 }
 
@@ -61,10 +54,11 @@ func UserRegister(email, pass string) (httpStatus int, err error) {
 		return http.StatusNotAcceptable, fmt.Errorf("email already used")
 	}
 
-	var u User
-	u.Email = email
-	u.PasswordHash = PasswordHash(pass)
-	u.Token = RandomString(12)
+	u := User{
+		Email:        email,
+		PasswordHash: PasswordHash(pass),
+		Token:        RandomString(12),
+	}
 
 	if err := AppendUser(u); err != nil {
 		return http.StatusInternalServerError, err

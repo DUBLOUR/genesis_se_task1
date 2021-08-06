@@ -7,10 +7,6 @@ import (
 	"os"
 )
 
-const logFile string = "/var/log/btc-requester/responses.log"
-const dbFile string = "/etc/btc-requester/users.csv"
-const serverPort string = ":9990"
-
 func Respond(w http.ResponseWriter, r *http.Request, httpStatus int, data map[string]interface{}) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(httpStatus)
@@ -22,7 +18,7 @@ func Respond(w http.ResponseWriter, r *http.Request, httpStatus int, data map[st
 
 func main() {
 	//Init log file
-	logger, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	logger, err := os.OpenFile(LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -126,5 +122,5 @@ func main() {
 
 	})
 
-	http.ListenAndServe(serverPort, nil)
+	http.ListenAndServe(ServerPort, nil)
 }

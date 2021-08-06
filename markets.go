@@ -9,16 +9,14 @@ import (
 	"strconv"
 )
 
+type Money float64
 
-type CostType float64
-
-func GetBinancePrice(currency string) (cost CostType, err error) {
+func GetBinancePrice(currency string) (cost Money, err error) {
 	//About Binance API: https://binance-docs.github.io/apidocs/
-	marketEndpoint := "https://api3.binance.com/api/v3/ticker/price?"
 	params := url.Values{}
 	params.Set("symbol", currency)
 
-	r, err := http.Get(marketEndpoint + params.Encode())
+	r, err := http.Get(MarketEndpoint + params.Encode())
 	if err != nil {
 		return 0, fmt.Errorf("failed market connect")
 	}
@@ -44,9 +42,9 @@ func GetBinancePrice(currency string) (cost CostType, err error) {
 		return 0, fmt.Errorf("incorrect market response")
 	}
 
-	return CostType(priceFloat), nil
+	return Money(priceFloat), nil
 }
 
-func Cost(currency string) (cost CostType, err error) {
+func Cost(currency string) (cost Money, err error) {
 	return GetBinancePrice(currency)
 }
