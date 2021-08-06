@@ -35,7 +35,7 @@ func main() {
 
 	//Registration of new account
 	//Require `email` and `password` fields in URL
-	//Append new user in `dbFile` and return `{"status":"Ok"}` if successful
+	//Append new user in `UsersFile` and return `{"status":"Ok"}` if successful
 	http.HandleFunc("/user/create", func(w http.ResponseWriter, r *http.Request) {
 		email := r.URL.Query().Get("email")
 		password := r.URL.Query().Get("password")
@@ -105,6 +105,7 @@ func main() {
 				}
 				Respond(w, r, http.StatusInternalServerError, mess)
 			}
+			return
 		}
 
 		if token == "" {

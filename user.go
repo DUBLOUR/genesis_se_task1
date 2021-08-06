@@ -29,6 +29,10 @@ func RandomString(length int) string {
 	return string(s)
 }
 
+func CreateToken() string {
+	return RandomString(TokenLength)
+}
+
 var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 func IsEmailValid(email string) bool {
@@ -57,7 +61,7 @@ func UserRegister(email, pass string) (httpStatus int, err error) {
 	u := User{
 		Email:        email,
 		PasswordHash: PasswordHash(pass),
-		Token:        RandomString(12),
+		Token:        CreateToken(),
 	}
 
 	if err := AppendUser(u); err != nil {
@@ -67,7 +71,7 @@ func UserRegister(email, pass string) (httpStatus int, err error) {
 	return http.StatusOK, nil
 }
 
-//Find token for registered user in database
+//Request new token for registered user
 func UserLogin(email, pass string) (token string, httpStatus int, err error) {
 	if email == "" {
 		return "", http.StatusBadRequest, fmt.Errorf("incorrect email")
@@ -78,7 +82,12 @@ func UserLogin(email, pass string) (token string, httpStatus int, err error) {
 		return "", http.StatusUnauthorized, fmt.Errorf("incorrect login")
 	}
 
-	return u.Token, http.StatusOK, nil
+	newToken := CreateToken()
+	err = RewriteToken(email, newToken)
+	if err != nil {
+		return "", http.StatusInternalServerError, err
+	}
+	return newToken, http.StatusOK, nil
 }
 
 //Check an existing user with this token
