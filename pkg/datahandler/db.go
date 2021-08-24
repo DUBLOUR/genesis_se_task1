@@ -1,4 +1,4 @@
-package main
+package datahandler
 
 import (
 	"encoding/csv"

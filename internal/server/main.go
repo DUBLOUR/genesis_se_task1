@@ -1,10 +1,12 @@
-package main
+package server
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
 	"os"
+	"github.com/dublour/genesis_se_task1/pkg/binance
+	"github.com/dublour/genesis_se_task1/pkg/model
 )
 
 func Respond(w http.ResponseWriter, r *http.Request, httpStatus int, data map[string]interface{}) {

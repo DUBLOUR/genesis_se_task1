@@ -1,4 +1,4 @@
-package main
+package datahandler
 
 import (
 	"crypto/sha512"
@@ -9,6 +9,14 @@ import (
 	"regexp"
 	"time"
 )
+
+
+type User struct {
+	Email        string
+	PasswordHash string
+	Token        string //Random string generated at registration
+}
+
 
 //Hashing with saltFindByEmailOrToken
 //Return 44-symbols string (base64)

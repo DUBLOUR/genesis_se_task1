@@ -1,4 +1,4 @@
-package main
+package binance
 
 import (
 	"encoding/json"
@@ -11,7 +11,9 @@ import (
 
 type Money float64
 
-func GetBinancePrice(currency string) (cost Money, err error) {
+type Request struct{}
+
+func (*Request) CurrentPrice(currency string) (cost Money, err error) {
 	//About Binance API: https://binance-docs.github.io/apidocs/
 	params := url.Values{}
 	params.Set("symbol", currency)
@@ -32,7 +34,7 @@ func GetBinancePrice(currency string) (cost Money, err error) {
 		Price  string
 	}
 
-	respData := &BinanceResponse{}
+	respData := new(BinanceResponse)
 	if err = json.Unmarshal(respBody, respData); err != nil {
 		return 0, fmt.Errorf("incorrect market response")
 	}
@@ -43,8 +45,4 @@ func GetBinancePrice(currency string) (cost Money, err error) {
 	}
 
 	return Money(priceFloat), nil
-}
-
-func Cost(currency string) (cost Money, err error) {
-	return GetBinancePrice(currency)
 }
